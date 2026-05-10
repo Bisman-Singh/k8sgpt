@@ -432,7 +432,8 @@ func TestVerbose_NewAnalysisWithoutExplain(t *testing.T) {
 
 	output := util.CaptureOutput(func() {
 		a, err := NewAnalysis(
-			"", "english", []string{"Pod"}, "default", "", true,
+			"", "english", []string{"Pod"}, "default", "", "",
+			true,
 			false, // explain
 			10, false, false, []string{}, false,
 		)
@@ -491,7 +492,8 @@ func TestVerbose_NewAnalysisWithExplain(t *testing.T) {
 
 	output := util.CaptureOutput(func() {
 		a, err := NewAnalysis(
-			"", "english", []string{"Pod"}, "default", "", true,
+			"", "english", []string{"Pod"}, "default", "", "",
+			true,
 			true, // explain
 			10, false, false, []string{}, false,
 		)

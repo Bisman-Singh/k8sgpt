@@ -41,10 +41,23 @@ type Analyzer struct {
 	Context       context.Context
 	Namespace     string
 	LabelSelector string
+	ResourceName  string
 	AIClient      ai.IAI
 	PreAnalysis   map[string]PreAnalysis
 	Results       []Result
 	OpenapiSchema *openapi_v2.Document
+}
+
+// ListOptions returns metav1.ListOptions with label selector and optional
+// field selector for filtering by resource name.
+func (a *Analyzer) ListOptions() metav1.ListOptions {
+	opts := metav1.ListOptions{
+		LabelSelector: a.LabelSelector,
+	}
+	if a.ResourceName != "" {
+		opts.FieldSelector = "metadata.name=" + a.ResourceName
+	}
+	return opts
 }
 
 type PreAnalysis struct {

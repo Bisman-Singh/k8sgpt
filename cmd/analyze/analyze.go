@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/fatih/color"
@@ -35,6 +36,7 @@ var (
 	nocache         bool
 	namespace       string
 	labelSelector   string
+	resource        string
 	anonymize       bool
 	maxConcurrency  int
 	withDoc         bool
@@ -52,6 +54,21 @@ var AnalyzeCmd = &cobra.Command{
 	Long: `This command will find problems within your Kubernetes cluster and
 	provide you with a list of issues that need to be resolved`,
 	Run: func(cmd *cobra.Command, args []string) {
+		// Parse --resource flag (Kind/Name format)
+		var resourceName string
+		if resource != "" {
+			parts := strings.SplitN(resource, "/", 2)
+			if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+				color.Red("Error: --resource must be in Kind/Name format (e.g. Deployment/my-app)")
+				os.Exit(1)
+			}
+			// Auto-set the filter to the resource kind
+			if len(filters) == 0 {
+				filters = []string{parts[0]}
+			}
+			resourceName = parts[1]
+		}
+
 		// Create analysis configuration first.
 		config, err := analysis.NewAnalysis(
 			backend,
@@ -59,6 +76,7 @@ var AnalyzeCmd = &cobra.Command{
 			filters,
 			namespace,
 			labelSelector,
+			resourceName,
 			nocache,
 			explain,
 			maxConcurrency,
@@ -175,6 +193,8 @@ func init() {
 	AnalyzeCmd.Flags().StringSliceVarP(&customHeaders, "custom-headers", "r", []string{}, "Custom Headers, <key>:<value> (e.g CustomHeaderKey:CustomHeaderValue AnotherHeader:AnotherValue)")
 	// label selector flag
 	AnalyzeCmd.Flags().StringVarP(&labelSelector, "selector", "L", "", "Label selector (label query) to filter on, supports '=', '==', and '!='. (e.g. -L key1=value1,key2=value2). Matching objects must satisfy all of the specified label constraints.")
+	// resource flag
+	AnalyzeCmd.Flags().StringVarP(&resource, "resource", "R", "", "Analyze a specific resource in Kind/Name format (e.g. Deployment/my-app, Pod/my-pod)")
 	// print stats
 	AnalyzeCmd.Flags().BoolVarP(&withStats, "with-stat", "s", false, "Print analysis stats. This option disables errors display.")
 }

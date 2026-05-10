@@ -432,6 +432,7 @@ func (s *K8sGptMCPServer) handleAnalyze(ctx context.Context, request mcp.CallToo
 		req.Filters,
 		req.Namespace,
 		req.LabelSelector,
+		"",         // ResourceName not supported in MCP mode yet
 		req.NoCache,
 		req.Explain,
 		req.MaxConcurrency,
